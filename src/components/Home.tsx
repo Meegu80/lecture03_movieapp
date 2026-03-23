@@ -1,4 +1,4 @@
-// 
+import styles from "./styles/Home.module.css"
 import {useEffect, useState} from "react";
 
 export type MovieItem = {
@@ -37,7 +37,7 @@ const Home = () => {
                 ? <h1>loading...</h1>
                 : <div className={styles.container}>
                     {list.map((item, index) => {
-                        return <li key={index}>{item}</li>
+                        return <Movie key={index}>{item}</Movie>
                     })}
 
                 </div>
