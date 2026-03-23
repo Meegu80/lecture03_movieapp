@@ -1,5 +1,6 @@
 import {BrowserRouter, Route, Routes} from "react-router";
 import Home from "./components/Home.tsx";
+import Detail from "./components/Detail.tsx";
 
 const App = () => {
 
@@ -8,7 +9,7 @@ const App = () => {
         <BrowserRouter>
           <Routes>
               <Route path={"/"} element={<Home />}>Home</Route>
-            {/*<Route path={"/movie/:id"} element={<Detail />} />*/}
+            <Route path={"/movie/:id"} element={<Detail />} />
           </Routes>
         </BrowserRouter>
     )

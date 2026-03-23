@@ -23,24 +23,3 @@ const Movie = ({ movie }: { movie: MovieItem }) => {
 }
 
 export default Movie;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

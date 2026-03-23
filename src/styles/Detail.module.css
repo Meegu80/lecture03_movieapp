@@ -1,0 +1,162 @@
+.container {
+    width: 100vw;
+    min-height: 100dvh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+    box-sizing: border-box;
+    background-color: #f5f5f5;
+}
+
+.loading_container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    color: #444;
+}
+
+.loader {
+    width: 48px;
+    height: 48px;
+    border: 5px solid #ddd;
+    border-top-color: #237550;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.box {
+    width: 60vw;
+    max-width: 900px;
+    display: flex;
+    gap: 40px;
+    padding: 30px;
+    box-sizing: border-box;
+    border-radius: 20px;
+    border: 1px solid #aaaaaa;
+    background-color: #ffffff;
+    -webkit-box-shadow: 5px 19px 32px 5px rgba(130, 130, 130, 0.78);
+    box-shadow: 5px 19px 32px 5px rgba(130, 130, 130, 0.78);
+}
+
+.poster_wrap {
+    flex-shrink: 0;
+    width: 220px;
+}
+
+.poster {
+    width: 100%;
+    border-radius: 12px;
+    object-fit: cover;
+}
+
+.info {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.title {
+    font-size: 30px;
+    margin: 0;
+}
+
+.aka {
+    font-size: 13px;
+    color: #aaaaaa;
+    font-style: italic;
+    margin: 0;
+}
+
+.meta {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.badge {
+    font-size: 13px;
+    color: #888888;
+    background-color: #f0f0f0;
+    padding: 4px 10px;
+    border-radius: 8px;
+}
+
+.rating {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.rating_score {
+    font-size: 20px;
+    font-weight: bold;
+    color: #f5c518;
+}
+
+.vote_count {
+    font-size: 13px;
+    color: #aaaaaa;
+}
+
+.description {
+    font-size: 14px;
+    color: #888888;
+    line-height: 1.4;
+    margin: 0;
+}
+
+.genreBox {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.genre {
+    display: block;
+    border-radius: 10px;
+    padding: 5px 10px;
+    background-color: #237550;
+    color: white;
+    font-size: 10px;
+}
+
+.crew {
+    font-size: 14px;
+    color: #555555;
+    margin: 0;
+}
+
+.actors {
+    font-size: 14px;
+    color: #555555;
+    margin: 0;
+}
+
+.imdb_link {
+    display: inline-block;
+    color: #f5c518;
+    font-weight: bold;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.imdb_link:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+    .box {
+        width: 90vw;
+        flex-direction: column;
+    }
+
+    .poster_wrap {
+        width: 100%;
+    }
+}
