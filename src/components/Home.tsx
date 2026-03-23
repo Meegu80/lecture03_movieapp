@@ -1,6 +1,8 @@
-import {useEffect, useState, useRef} from "react";
+import {useEffect, useState, useRef, useCallback} from "react";
 import Movie from "./Movie.tsx";
 import styles from "../styles/Home.module.css";
+import Spinner from "./spinner/Spinner.tsx";
+
 
 export type MovieItem = {
     "#TITLE": string;
@@ -24,6 +26,7 @@ const Home = () => {
     const [list, setList] = useState<MovieItem[]>([]);
     const [queryIndex, setQueryIndex] = useState<number>(0);
     const [isFetching, setIsFetching] = useState<boolean>(false);
+    const isFetchingRef = useRef<boolean>(false); // 클로저 stale 방지용
 
     // 맨 아래 감지할 div에 붙일 ref
     const bottomRef = useRef<HTMLDivElement>(null);
@@ -33,6 +36,7 @@ const Home = () => {
         const query = QUERIES[queryIndex % QUERIES.length];
 
         setIsFetching(true);
+        isFetchingRef.current = true;
         fetch(`https://imdb.iamidiotareyoutoo.com/search?q=${query}&lsn=1&v=1`)
             .then(response => response.json())
             .then(data => {
@@ -48,40 +52,37 @@ const Home = () => {
                 }
                 setLoading(false);
                 setIsFetching(false);
+                isFetchingRef.current = false;
             })
             .catch((error) => {
                 console.error("Failed to fetch movies:", error);
                 setLoading(false);
                 setIsFetching(false);
+                isFetchingRef.current = false;
             });
     }, [queryIndex]);
 
-    // IntersectionObserver로 맨 아래 감지
+    // IntersectionObserver로 맨 아래 감지 (ref로 최신 isFetching 상태 참조)
+    const handleIntersect = useCallback((entries: IntersectionObserverEntry[]) => {
+        if (entries[0].isIntersecting && !isFetchingRef.current) {
+            setQueryIndex(prev => prev + 1);
+        }
+    }, []);
+
     useEffect(() => {
-        const observer = new IntersectionObserver(
-            (entries) => {
-                // bottomRef가 화면에 보이면 다음 쿼리로 이동
-                if (entries[0].isIntersecting && !isFetching) {
-                    setQueryIndex(prev => prev + 1);
-                }
-            },
-            { threshold: 1.0 }
-        );
+        const observer = new IntersectionObserver(handleIntersect, { threshold: 0 });
 
         if (bottomRef.current) {
             observer.observe(bottomRef.current);
         }
 
         return () => observer.disconnect();
-    }, [isFetching]);
+    }, [handleIntersect]);
 
     return (
         <main className={styles.main}>
             {loading ? (
-                <div className={styles.loading_container}>
-                    <div className={styles.loader}></div>
-                    <h1>Loading Cinematic Experience...</h1>
-                </div>
+                <Spinner />
             ) : (
                 <>
                     <header className={styles.header}>
@@ -96,18 +97,18 @@ const Home = () => {
                             <Movie key={item["#IMDB_ID"]} movie={item} />
                         ))}
                     </div>
-
-                    {/* 이 div가 화면에 보이면 자동으로 다음 데이터 로드 */}
-                    <div ref={bottomRef} className={styles.bottom_trigger}>
-                        {isFetching && (
-                            <div className={styles.loading_container}>
-                                <div className={styles.loader}></div>
-                                <p>Loading more...</p>
-                            </div>
-                        )}
-                    </div>
                 </>
             )}
+
+            {/* bottomRef는 항상 DOM에 존재해야 IntersectionObserver가 감지 가능 */}
+            <div ref={bottomRef} className={styles.bottom_trigger}>
+                {isFetching && (
+                    <div className={styles.loading_container}>
+                        <div className={styles.loader}></div>
+                        <p>Loading more...</p>
+                    </div>
+                )}
+            </div>
         </main>
     );
 }

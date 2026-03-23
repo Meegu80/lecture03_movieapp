@@ -2,6 +2,7 @@ import {useParams, useLocation} from "react-router";
 import {useEffect, useState} from "react";
 import styles from "../styles/Detail.module.css";
 import type {MovieItem} from "./Home.tsx";
+import Spinner from "./spinner/Spinner.tsx";
 
 type PrimaryImage = {
     url: string;
@@ -85,10 +86,7 @@ const Detail = () => {
     return (
         <main className={styles.container}>
             {loading ? (
-                <div className={styles.loading_container}>
-                    <div className={styles.loader}></div>
-                    <h1>Loading...</h1>
-                </div>
+               <Spinner/>
             ) : error ? (
                 // API 실패 시 Home에서 받은 movieItem으로 폴백
                 <div className={styles.box}>
@@ -176,7 +174,7 @@ const Detail = () => {
                         </div>
 
                         {/* IMDb 링크 */}
-                        <a href={movieItem?.["#IMDB_URL"]} target="_blank" rel="noreferrer" className={styles.imdb_link}>
+                        <a href={movieItem?.["#IMDB_URL"] ?? `https://www.imdb.com/title/${movie?.id}`} target="_blank" rel="noreferrer" className={styles.imdb_link}>
                             IMDb에서 보기 →
                         </a>
                     </div>
