@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import {useEffect, useState, useRef} from "react";
 import Movie from "./Movie.tsx";
 import styles from "../styles/Home.module.css";
 
@@ -16,29 +16,65 @@ export type MovieItem = {
     photo_height: number;
 }
 
+// 스크롤할 때마다 다른 쿼리로 새 데이터 요청
+const QUERIES = ["2025", "2024", "2023", "2022", "2021", "2020", "action", "comedy", "thriller", "horror", "drama", "sci-fi"];
+
 const Home = () => {
+    const [loading, setLoading] = useState<boolean>(true);
+    const [list, setList] = useState<MovieItem[]>([]);
+    const [queryIndex, setQueryIndex] = useState<number>(0);
+    const [isFetching, setIsFetching] = useState<boolean>(false);
 
-    // loading 상태관리에 대한 함수
-    const [ loading, setLoading ] = useState<boolean>(true);
-    //
-    const [ list, setList ] = useState<MovieItem[]>([]);
+    // 맨 아래 감지할 div에 붙일 ref
+    const bottomRef = useRef<HTMLDivElement>(null);
 
+    // 쿼리 인덱스가 바뀔 때마다 새 데이터 fetch
     useEffect(() => {
-        fetch("https://imdb.iamidiotareyoutoo.com/search?q=2025&lsn=1&v=1")
+        const query = QUERIES[queryIndex % QUERIES.length];
+
+        setIsFetching(true);
+        fetch(`https://imdb.iamidiotareyoutoo.com/search?q=${query}&lsn=1&v=1`)
             .then(response => response.json())
             .then(data => {
-                // API 응답 구조가 올바른지 확인 후 상태 업데이트
                 if (data.description) {
-                    setList(data.description as MovieItem[]);
+                    // 기존 리스트에 새 데이터 추가 (중복 제거)
+                    setList(prev => {
+                        const existingIds = new Set(prev.map(m => m["#IMDB_ID"]));
+                        const newItems = (data.description as MovieItem[]).filter(
+                            m => !existingIds.has(m["#IMDB_ID"])
+                        );
+                        return [...prev, ...newItems];
+                    });
                 }
                 setLoading(false);
+                setIsFetching(false);
             })
             .catch((error) => {
                 console.error("Failed to fetch movies:", error);
                 setLoading(false);
+                setIsFetching(false);
             });
-    }, []);
-// 렌더링 파트(JSX & TSX = 태그를 사용할 수 있게해주는 구간)===================================================================
+    }, [queryIndex]);
+
+    // IntersectionObserver로 맨 아래 감지
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            (entries) => {
+                // bottomRef가 화면에 보이면 다음 쿼리로 이동
+                if (entries[0].isIntersecting && !isFetching) {
+                    setQueryIndex(prev => prev + 1);
+                }
+            },
+            { threshold: 1.0 }
+        );
+
+        if (bottomRef.current) {
+            observer.observe(bottomRef.current);
+        }
+
+        return () => observer.disconnect();
+    }, [isFetching]);
+
     return (
         <main className={styles.main}>
             {loading ? (
@@ -54,15 +90,26 @@ const Home = () => {
                             <p className={styles.subtitle}>Discover the latest and greatest in cinema for 2025</p>
                         </div>
                     </header>
+
                     <div className={styles.container}>
                         {list.map((item) => (
                             <Movie key={item["#IMDB_ID"]} movie={item} />
                         ))}
                     </div>
+
+                    {/* 이 div가 화면에 보이면 자동으로 다음 데이터 로드 */}
+                    <div ref={bottomRef} className={styles.bottom_trigger}>
+                        {isFetching && (
+                            <div className={styles.loading_container}>
+                                <div className={styles.loader}></div>
+                                <p>Loading more...</p>
+                            </div>
+                        )}
+                    </div>
                 </>
             )}
         </main>
-    )
+    );
 }
 
 export default Home;
